@@ -4,5 +4,14 @@
   "main": "server.js",
   "repository": "https://github.com/yunjeoming/tdd-practice.git",
   "author": "yun <yunjeoming@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^6.9.0"
+  },
+  "devDependencies": {
+    "jest": "^29.4.1",
+    "node-mocks-http": "^1.12.1",
+    "supertest": "^6.3.3"
+  }
 }
