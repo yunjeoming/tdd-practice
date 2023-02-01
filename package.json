@@ -2,6 +2,9 @@
   "name": "tdd-practice",
   "version": "1.0.0",
   "main": "server.js",
+  "scripts": {
+    "test": "jest"
+  },
   "repository": "https://github.com/yunjeoming/tdd-practice.git",
   "author": "yun <yunjeoming@gmail.com>",
   "license": "MIT",
