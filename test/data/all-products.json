@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Hat",
+    "description": "good",
+    "price": 30
+  },
+  {
+    "name": "Phone",
+    "description": "not good",
+    "price": 100
+  },
+  {
+    "name": "Pants",
+    "description": "good",
+    "price": 40
+  }
+]

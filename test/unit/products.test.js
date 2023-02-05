@@ -2,9 +2,11 @@ const productController = require('../../controller/products');
 const productModel = require('../../models/Product');
 const httpMocks = require('node-mocks-http');
 const newProduct = require('../data/new-product.json');
-const Product = require('../../models/Product');
+const allProducts = require('../data/all-products.json');
 
+// jest.fn() db의 실제값을 가져오는 것이 아닌 jest에서 생성한 임의의 값을 가져온다.
 productModel.create = jest.fn();
+productModel.find = jest.fn();
 
 let req, res, next;
 
@@ -36,7 +38,7 @@ describe('Product Controller Create', () => {
   })
 
   test('should return json body in response', async () => {
-    Product.create.mockReturnValue(newProduct);
+    productModel.create.mockReturnValue(newProduct);
     await productController.createProduct(req, res, next);
     expect(res._getJSONData()).toStrictEqual(newProduct)
   })
@@ -47,5 +49,28 @@ describe('Product Controller Create', () => {
     productModel.create.mockReturnValue(rejectedPromise);
     await productController.createProduct(req, res, next);
     expect(next).toBeCalledWith(errorMessage);
+  })
+})
+
+describe('Product Controller Get', () => {
+  test('should have a getProducts function', () => {
+    expect(typeof productController.getProducts).toBe('function')
+  });
+
+  test('should call ProductModel.find({})', async () => {
+    await productController.getProducts(req, res, next);
+    expect(productModel.find).toHaveBeenCalledWith({});
+  });
+
+  test('should return 200 response', async () => {
+    await productController.getProducts(req, res, next);
+    expect(res.statusCode).toBe(200);
+    expect(res._isEndCalled).toBeTruthy();
+  });
+
+  test('should return json body in response', async () => {
+    productModel.find.mockReturnValue(allProducts);
+    await productController.getProducts(req, res, next);
+    expect(res._getJSONData()).toStrictEqual(allProducts)
   })
 })
