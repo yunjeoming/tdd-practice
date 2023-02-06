@@ -7,6 +7,9 @@ const allProducts = require('../data/all-products.json');
 // jest.fn() db의 실제값을 가져오는 것이 아닌 jest에서 생성한 임의의 값을 가져온다.
 productModel.create = jest.fn();
 productModel.find = jest.fn();
+productModel.findById = jest.fn();
+
+const productId = '123qweasdrty456'
 
 let req, res, next;
 
@@ -72,5 +75,53 @@ describe('Product Controller Get', () => {
     productModel.find.mockReturnValue(allProducts);
     await productController.getProducts(req, res, next);
     expect(res._getJSONData()).toStrictEqual(allProducts)
+  });
+
+  test('should handle errors', async () => {
+    const errorMessage = { message: 'Error finding product data' };
+    const rejectedPromise = Promise.reject(errorMessage);
+    productModel.find.mockReturnValue(rejectedPromise);
+    await productController.getProducts(req, res, next);
+    expect(next).toHaveBeenCalledWith(errorMessage);
   })
 })
+
+describe('Product Conteroller GetById', () => {
+  test('should have a getProductById', () => {
+    expect(typeof productController.getProductById).toBe('function')
+  });
+
+  test('should call productModel.findById', async () => {
+    req.params.productId = productId;
+    await productController.getProductById(req, res, next);
+    expect(productModel.findById).toBeCalledWith(productId);
+  });
+
+  test('should return json body and response code 200', async () => {
+    productModel.findById.mockReturnValue(newProduct);
+    await productController.getProductById(req, res, next);
+    expect(res.statusCode).toBe(200);
+    expect(res._getJSONData()).toStrictEqual(newProduct);
+    expect(res._isEndCalled()).toBeTruthy();
+  });
+
+  test('should return 404 when item doesnt exist', async () => {
+    productModel.findById.mockReturnValue(null);
+    await productController.getProductById(req, res, next);
+    expect(res.statusCode).toBe(404);
+    expect(res._isEndCalled()).toBeTruthy();
+  });
+
+  test('should handle errors', async () => {
+    const errorMessage = { message: '' };
+    const rejectedPromise = Promise.reject(errorMessage);
+    productModel.findById.mockReturnValue(rejectedPromise);
+    await productController.getProductById(req, res, next);
+    expect(next).toHaveBeenCalledWith(errorMessage);
+  });
+})
+
+// toBe(value) : value 값을 갖음
+// toStrictEqual(value) : 리턴값이 value
+// toBeTruthy : true일 때
+// toHaveBeenCalledWith(value) : 리턴값중 value를 포함
