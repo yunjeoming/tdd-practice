@@ -9,6 +9,7 @@ productModel.create = jest.fn();
 productModel.find = jest.fn();
 productModel.findById = jest.fn();
 productModel.findByIdAndUpdate = jest.fn();
+productModel.findByIdAndDelete = jest.fn();
 
 const productId = '123qweasdrty456'
 const updatedProduct = { name: 'updated name', description: 'updated description'};
@@ -163,9 +164,49 @@ describe('Product Controller Update', () => {
     await productController.updateProduct(req, res, next);
     expect(next).toHaveBeenCalledWith(errorMessage);
   });
+});
+
+describe('Product Controller Delete', () => {
+  test('should have a deleteProduct function', () => {
+    expect(typeof productController.deleteProduct).toBe('function');
+  });
+
+  test('should call productModel.findByIdAndDelete', async () => {
+    req.params.productId = productId;
+    await productController.deleteProduct(req, res, next);
+    expect(productModel.findByIdAndDelete).toBeCalledWith(productId);
+  });
+
+  test('should return 200 response', async () => {
+    let deletedProduct = {
+      name: 'deletedProduct',
+      description: 'deleted description'
+    }
+    productModel.findByIdAndDelete.mockReturnValue(deletedProduct);
+    await productController.deleteProduct(req, res, next);
+    expect(res.statusCode).toBe(200);
+    expect(res._getJSONData()).toStrictEqual(deletedProduct);
+    expect(res._isEndCalled()).toBeTruthy();
+  });
+
+  test('should handle 404 when item doesnt exist', async () => {
+    productModel.findByIdAndDelete.mockReturnValue(null);
+    await productController.deleteProduct(req, res, next);
+    expect(res.statusCode).toBe(404);
+    expect(res._isEndCalled(0)).toBeTruthy();
+  });
+
+  test('should handle errors', async () => {
+    const errorMessage = { message: 'Error'};
+    const rejectedPromise = Promise.reject(errorMessage);
+    productModel.findByIdAndDelete.mockReturnValue(rejectedPromise);
+    await productController.deleteProduct(req, res, next);
+    expect(next).toHaveBeenCalledWith(errorMessage);
+  });
 })
 
 // toBe(value) : value 값을 갖음
 // toStrictEqual(value) : 리턴값이 value
 // toBeTruthy : true일 때
+// toBeCalledWith(param) : 호출시 사용되는 param
 // toHaveBeenCalledWith(param) : 호출시 사용되는 param
